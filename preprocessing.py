@@ -1,7 +1,7 @@
 import csv
 import json
 import nltk
-from numpy import zeros
+import numpy
 from os import listdir, path
 from pprint import pprint
 import string
@@ -27,16 +27,19 @@ punctuation_set = set(string.punctuation)
 stopwords_set = set(nltk.corpus.stopwords.words('english'))
 stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
+# Machine learning data.
+feature_set = {}
+
 
 def read_csv(csv_name):
-    print('reading csv: ' + csv_name)
-    csv_labels = dict()
+    print('reading csv: ' + csv_name + '...')
+    csv_labels = {}
 
     with open(files[csv_name]) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         next(csv_reader)  # Skip header row.
         for row in csv_reader:
-            csv_labels[row[2]] = zeros(label.count)
+            csv_labels[row[2]] = numpy.zeros(label.count)
             label_id = label.ids[row[0]][row[1]]
             csv_labels[row[2]][label_id] = 1
 
@@ -63,12 +66,19 @@ def process_tweet(json_data):
 
     # Stem the tokens.
     stemmed = [stemmer.stem(x) for x in tokens]
+
+    # Add token to feature_set.
+    # TODO: Maybe move this part out of this method.
+    for x in stemmed:
+        if x not in feature_set:
+            feature_set[x] = len(feature_set)
+
     return stemmed
 
 
 def read_tweets(dir_name):
-    print('reading tweets')
-    json_tweets = dict()
+    print('reading tweets...')
+    json_tweets = {}
 
     for f in listdir(dir_name):
         full_path = path.join(dir_name, f)
@@ -82,9 +92,26 @@ def read_tweets(dir_name):
     return json_tweets
 
 
+def generate_feature_vectors(tweet_data):
+    print('generating feature vectors...')
+    tweet_features = {}
+
+    for tweet_id, data in tweet_data.items():
+        vector = numpy.zeros(len(feature_set))
+
+        for token in data:
+            if token in feature_set:
+                vector[feature_set[token]] += 1  # Not normalised.
+
+        tweet_features[tweet_id] = vector
+
+    print('done generating feature vectors')
+    return tweet_features
+
+
 development_labels = read_csv('development')
 tweets_data = read_tweets(directories.get('tweets'))
 
-iterator = iter(tweets_data)
-for i in range(5):
-    pprint(tweets_data[next(iterator)])
+tweet_features = generate_feature_vectors(tweets_data)
+test = tweet_features[next(iter(tweet_features))]
+
