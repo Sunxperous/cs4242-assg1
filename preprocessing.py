@@ -9,6 +9,7 @@ from pprint import pprint
 import label  # label.py for topic and sentiment ids
 
 
+# Set up.
 from configparser import SafeConfigParser
 config = SafeConfigParser()
 # Read default configuration.
@@ -19,6 +20,8 @@ directories = dict(config.items('directory'))
 config.read('config.ini')
 files.update(config.items('file'))
 directories.update(config.items('directory'))
+
+stopwords_set = set(nltk.corpus.stopwords.words('english'))
 
 
 def read_csv(csv_name):
@@ -38,7 +41,20 @@ def read_csv(csv_name):
 
 
 def process_tweet(json_data):
-    return json_data['text']
+    text = json_data.get('text')
+
+    # Strip URLs.
+    for url in json_data.get('entities').get('urls', []):
+        text = text.replace(url.get('url', ''), '')
+
+    # Strip words beginning with @ or #.
+    text = text.split(' ')
+    text = ' '.join([x for x in text if x[0] != '@' and x[0] != '#'])
+
+    words = nltk.word_tokenize(text)
+    # TODO: Remove stopwords.
+    # TODO: Use Snowball stemmer (possibly other languages).
+    return words
 
 
 def read_tweets(dir_name):
@@ -52,11 +68,12 @@ def read_tweets(dir_name):
             with open(full_path) as json_file:
                 json_data = json.load(json_file)
                 json_tweets[json_data['id']] = process_tweet(json_data)
+                return json_tweets
 
     print('done reading tweets')
     return json_tweets
 
 
 development_labels = read_csv('development')
-tweets_data = read_tweets(directories['tweets'])
+tweets_data = read_tweets(directories.get('tweets'))
 pprint(tweets_data[next(iter(tweets_data))])
