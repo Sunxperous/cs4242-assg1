@@ -4,12 +4,13 @@ import nltk
 from numpy import zeros
 from os import listdir, path
 from pprint import pprint
+import string
 
 
 import label  # label.py for topic and sentiment ids
 
 
-# Set up.
+# Configuration.
 from configparser import SafeConfigParser
 config = SafeConfigParser()
 # Read default configuration.
@@ -21,7 +22,10 @@ config.read('config.ini')
 files.update(config.items('file'))
 directories.update(config.items('directory'))
 
+# Language tools.
+punctuation_set = set(string.punctuation)
 stopwords_set = set(nltk.corpus.stopwords.words('english'))
+stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
 
 def read_csv(csv_name):
@@ -48,13 +52,18 @@ def process_tweet(json_data):
         text = text.replace(url.get('url', ''), '')
 
     # Strip words beginning with @ or #.
-    text = text.split(' ')
-    text = ' '.join([x for x in text if x[0] != '@' and x[0] != '#'])
+    # TODO: Strip "RT" at the beginning of the tweet?
+    text_split = text.split(' ')
+    text = ' '.join([x for x in text_split if len(x) > 0 and x[0] != '@' and x[0] != '#'])
 
-    words = nltk.word_tokenize(text)
-    # TODO: Remove stopwords.
-    # TODO: Use Snowball stemmer (possibly other languages).
-    return words
+    # Tokenize and remove punctuation and stopwords.
+    # TODO: Might need to consider stopwords that tweak meanings of words, e.g. 'not'.
+    tokens = nltk.word_tokenize(text)
+    tokens = [x for x in tokens if x not in punctuation_set and x not in stopwords_set]
+
+    # Stem the tokens.
+    stemmed = [stemmer.stem(x) for x in tokens]
+    return stemmed
 
 
 def read_tweets(dir_name):
@@ -68,7 +77,6 @@ def read_tweets(dir_name):
             with open(full_path) as json_file:
                 json_data = json.load(json_file)
                 json_tweets[json_data['id']] = process_tweet(json_data)
-                return json_tweets
 
     print('done reading tweets')
     return json_tweets
@@ -76,4 +84,7 @@ def read_tweets(dir_name):
 
 development_labels = read_csv('development')
 tweets_data = read_tweets(directories.get('tweets'))
-pprint(tweets_data[next(iter(tweets_data))])
+
+iterator = iter(tweets_data)
+for i in range(5):
+    pprint(tweets_data[next(iterator)])
