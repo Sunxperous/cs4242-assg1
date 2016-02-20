@@ -1,10 +1,16 @@
-import sklearn
+from sklearn import neighbors
 
 
 from index import Index
 
 
-index = Index()
-print(index.tweet_features[next(iter(index.tweet_features))])
+index = Index('testing')
+
+knn = neighbors.KNeighborsClassifier(15, weights='uniform')
+sample = [v for k, v in index.tweet_features.items()]
+target = [v for k, v in index.development_labels.items()]
+knn.fit(sample, target)
+
+
 
 

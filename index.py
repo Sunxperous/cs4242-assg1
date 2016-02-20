@@ -28,11 +28,11 @@ stopwords_set = set(nltk.corpus.stopwords.words('english'))
 stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
 class Index:
-    def __init__(self):
+    def __init__(self, csv_type):
         # Machine learning data.
         self.feature_set = {}
 
-        self.development_labels = self.read_csv('development')
+        self.development_labels = self.read_csv(csv_type)
         self.tweets_data = self.read_tweets(directories.get('tweets'))
         self.tweet_features = self.generate_feature_vectors(self.tweets_data)
 
@@ -44,9 +44,8 @@ class Index:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                csv_labels[row[2]] = numpy.zeros(label.count)
                 label_id = label.ids[row[0]][row[1]]
-                csv_labels[row[2]][label_id] = 1
+                csv_labels[row[2]] =  label_id
 
         print('done reading csv')
         return csv_labels
@@ -86,7 +85,9 @@ class Index:
         for f in listdir(dir_name):
             full_path = path.join(dir_name, f)
 
-            if path.isfile(full_path) and path.splitext(full_path)[1] == '.json':
+            tweet_id, f_ext = path.splitext(full_path)
+            if (path.isfile(full_path) and f_ext == '.json'
+                    and tweet_id[tweet_id.rfind('/')+1:] in self.development_labels):
                 with open(full_path) as json_file:
                     json_data = json.load(json_file)
                     json_tweets[json_data['id']] = self.process_tweet(json_data)
