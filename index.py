@@ -4,28 +4,11 @@ import nltk
 import numpy
 from os import listdir, path
 from pprint import pprint
-import string
 
 
 import label  # label.py for topic and sentiment ids
+from utility import paths, punctuation_set, stemmer, stopwords_set
 
-
-# Configuration.
-from configparser import SafeConfigParser
-config = SafeConfigParser()
-# Read default configuration.
-config.read('config.default.ini')
-files = dict(config.items('file'))
-directories = dict(config.items('directory'))
-# Read custom configuration.
-config.read('config.ini')
-files.update(config.items('file'))
-directories.update(config.items('directory'))
-
-# Language tools.
-punctuation_set = set(string.punctuation)
-stopwords_set = set(nltk.corpus.stopwords.words('english'))
-stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
 class Index:
     def __init__(self, csv_type):
@@ -33,14 +16,14 @@ class Index:
         self.feature_set = {}
 
         self.development_labels = self.read_csv(csv_type)
-        self.tweets_data = self.read_tweets(directories.get('tweets'))
+        self.tweets_data = self.read_tweets(paths['directories'].get('tweets'))
         self.tweet_features = self.generate_feature_vectors(self.tweets_data)
 
     def read_csv(self, csv_name):
         print('reading csv: ' + csv_name + '...')
         csv_labels = {}
 
-        with open(files[csv_name]) as csv_file:
+        with open(paths['files'][csv_name]) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
