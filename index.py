@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import csv
 import json
 import nltk
@@ -44,10 +45,10 @@ class Index:
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
-        print('indexing complete.')
+        print('indexing complete!')
 
     def read_csv(self, csv_name):
-        tweet_labels = {}
+        tweet_labels = OrderedDict()
 
         with open(paths['files'][csv_name]) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
@@ -87,7 +88,7 @@ class Index:
         return stemmed
 
     def read_tweets(self, dir_name):
-        json_tweets = {}
+        json_tweets = OrderedDict()
 
         # TODO: Iterate on tweet_labels list instead of iterating on directory.
         for f in listdir(dir_name):
@@ -103,7 +104,7 @@ class Index:
         return json_tweets
 
     def generate_feature_vectors(self, tweet_data):
-        tweet_features = {}
+        tweet_features = OrderedDict()
 
         for tweet_id, data in tweet_data.items():
             vector = numpy.zeros(len(self.feature_set))
