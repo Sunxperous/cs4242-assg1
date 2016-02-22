@@ -30,7 +30,7 @@ for tweet_id, predicted in prediction.items():
         print(str(tweet_id) + ' not found in tweet_labels, wtf?')
     else:
         actual = testing_index.tweet_labels[str(tweet_id)]
-        if predicted != actual:
+        if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
             print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
         else:
