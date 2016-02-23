@@ -1,22 +1,29 @@
 from sklearn import neighbors
-
+from sklearn import svm
 
 from index import Index
 
 
 trained_index = Index('training')
 
-knn = neighbors.KNeighborsClassifier(weights='distance')
 samples = [v for k, v in trained_index.tweet_features.items()]
 targets = [v for k, v in trained_index.tweet_labels.items()]
 
-knn.fit(samples, targets)
+# knn = neighbors.KNeighborsClassifier(weights='uniform')
+# knn.fit(samples, targets)
+
+svc = svm.SVC(kernel='linear', C=1.5)
+# linear kernel is used when feature size is big (~10,000) and sample size is moderate (5000)
+# C is default 1.0, decrease if overfitting, increase if underfitting
+# if uneven data result, try adding (class_weight='balanced')
+# scaling and normalization is highly recommended
+svc.fit(samples, targets) 
 
 testing_index = Index('testing', trained_index.feature_set)
 
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
-    prediction[tweet_id] = knn.predict([feature_vector])[0]
+    prediction[tweet_id] = svc.predict([feature_vector])[0]
 
 
 #print([k for k, v in testing_index.tweet_features.items()])
