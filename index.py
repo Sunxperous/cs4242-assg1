@@ -52,7 +52,7 @@ class Index:
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('creating feature vectors from lexicon...')
-        #self.generate_lexicon_data(lexicon)
+        self.generate_lexicon_data(lexicon)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
@@ -147,9 +147,9 @@ class Index:
 
             # Generate label of word.
             if float(weight) > 0.5:
-                lexicon_labels[word] = 0
+                lexicon_labels[key] = 0
             elif float(weight) < 0.15:
-                lexicon_labels[word] = 1
+                lexicon_labels[key] = 1
 
             key += 1
 
