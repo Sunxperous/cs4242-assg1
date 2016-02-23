@@ -44,6 +44,7 @@ class Index:
 
         print('adding into feature set...')
         self.add_to_feature_set(self.tweet_data)
+        self.add_lexicon_to_feature_set(lexicon)
         print('added ' + str(len(self.feature_set)) + ' (word) features')
 
         print('generating feature vectors...')
@@ -80,8 +81,12 @@ class Index:
                 self.feature_set[word] = i
                 i += 1
 
-    def add_lexicon(self, lexicon):
-        pass
+    def add_lexicon_to_feature_set(self, lexicon):
+        i = len(self.feature_set)
+        for word, v in lexicon.items():
+            if word not in self.feature_set:
+                self.feature_set[word] = i
+                i += 1
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
