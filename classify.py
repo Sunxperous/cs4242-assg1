@@ -25,16 +25,26 @@ for tweet_id, feature_vector in testing_index.tweet_features.items():
 
 correct = 0
 wrong = 0
+
+sentiments = ['positive', 'negative', 'neutral', 'irrelevant']
+results = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+
 for tweet_id, predicted in prediction.items():
     if str(tweet_id) not in testing_index.tweet_labels:
         print(str(tweet_id) + ' not found in tweet_labels, wtf?')
     else:
         actual = testing_index.tweet_labels[str(tweet_id)]
+        results[predicted % 4][actual % 4] += 1
         if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
-            print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
+            print(tweet_id)
+            # print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
+            print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
+
         else:
             correct += 1
+
+print('wrong result: ' + str(results))
 
 print('correct: ' + str(correct) + '; wrong: ' + str(wrong))
 

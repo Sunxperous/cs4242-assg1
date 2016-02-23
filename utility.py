@@ -7,7 +7,6 @@ punctuation_set = set(string.punctuation)
 stopwords_set = set(nltk.corpus.stopwords.words('english'))
 stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
-
 # Configuration.
 from configparser import SafeConfigParser
 config = SafeConfigParser()
