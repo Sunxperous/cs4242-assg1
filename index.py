@@ -7,7 +7,7 @@ from pprint import pprint
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import paths
+from utility import paths, lexicon
 
 
 class Index:
@@ -36,12 +36,12 @@ class Index:
             print('indexing without training...')
 
         print('reading csv ' + csv_type + '...')
-        self.tweet_labels = self.read_csv(csv_type)
+        self.tweet_labels = self.read_labels(csv_type)
         print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
         print('reading tweets...')
         self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
-    
+
         print('adding into feature set...')
         for k, v in self.tweet_data.items():
             self.add_to_feature_set(v)
@@ -51,7 +51,7 @@ class Index:
         print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!')
 
-    def read_csv(self, csv_name):
+    def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
         with open(paths['files'][csv_name]) as csv_file:
@@ -65,11 +65,13 @@ class Index:
 
     def add_to_feature_set(self, stemmed_words):
         # Add token to feature_set.
-        # TODO: Maybe move this part out of this method.
 
         for x in stemmed_words:
             if x not in self.feature_set and self.train:
                 self.feature_set[x] = len(self.feature_set)
+
+    def add_lexicon(self, lexicon):
+        pass
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
