@@ -52,7 +52,7 @@ class Index:
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('creating feature vectors from lexicon...')
-        self.generate_lexicon_data(lexicon)
+        #self.generate_lexicon_data(lexicon)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
@@ -64,7 +64,7 @@ class Index:
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
                 label_id = label.ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
-                tweet_labels[row[2]] =  label_id
+                tweet_labels[int(row[2])] =  label_id
 
         return tweet_labels
 
@@ -101,7 +101,7 @@ class Index:
 
             tweet_id, f_ext = path.splitext(full_path)
             if (path.isfile(full_path) and f_ext == '.json'
-                    and tweet_id[tweet_id.rfind('/')+1:] in self.tweet_labels):
+                    and int(tweet_id[tweet_id.rfind('/')+1:]) in self.tweet_labels):
                 with open(full_path) as json_file:
                     json_data = json.load(json_file)
                     json_tweets[json_data['id']] = process_tweet(json_data)

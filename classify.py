@@ -14,8 +14,8 @@ else:
 
 trained_index = Index('training')
 
-samples = [v for k, v in trained_index.tweet_features.items()]
-targets = [v for k, v in trained_index.tweet_labels.items()]
+samples = [v for k, v in sorted(trained_index.tweet_features.items(), key=lambda t: t[0])]
+targets = [v for k, v in sorted(trained_index.tweet_labels.items(), key=lambda t: t[0])]
 
 if model == 1:
     clf = neighbors.KNeighborsClassifier(n_neighbors=num_neighbours, weights='uniform')
@@ -27,7 +27,7 @@ elif model == 2:
     # if uneven data result, try adding (class_weight='balanced')
     # scaling and normalization is highly recommended
 
-clf.fit(samples, targets)   
+clf.fit(samples, targets)
 
 testing_index = Index('testing', trained_index.feature_set)
 
@@ -42,10 +42,10 @@ sentiments = ['positive', 'negative', 'neutral', 'irrelevant']
 results = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
 
 for tweet_id, predicted in prediction.items():
-    if str(tweet_id) not in testing_index.tweet_labels:
-        print(str(tweet_id) + ' not found in tweet_labels, wtf?')
+    if tweet_id not in testing_index.tweet_labels:
+        print(tweet_id + ' not found in tweet_labels, wtf?')
     else:
-        actual = testing_index.tweet_labels[str(tweet_id)]
+        actual = testing_index.tweet_labels[tweet_id]
         results[actual % 4][predicted % 4] += 1
         if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
