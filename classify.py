@@ -29,7 +29,7 @@ elif model == 2:
 
 clf.fit(samples, targets)
 
-testing_index = Index('training', trained_index.feature_set)
+testing_index = Index('testing', trained_index.feature_set)
 
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():

@@ -45,7 +45,7 @@ class Index:
 
         print('adding into feature set...')
         self.add_to_feature_set(self.tweet_data)
-        #self.add_lexicon_to_feature_set(positive)
+        self.add_lexicon_to_feature_set(positive)
         self.add_lexicon_to_feature_set(negative)
         print('added ' + str(len(self.feature_set)) + ' (word) features')
 
@@ -53,6 +53,7 @@ class Index:
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('creating feature vectors from lexicon...')
+
         self.generate_lexicon_data(positive, True)
         self.generate_lexicon_data(negative, False)
         
@@ -155,9 +156,9 @@ class Index:
 
             # Generate label of word.
             if isPositive:
-                lexicon_labels[word] = 0
+                lexicon_labels[key] = 0
             else:
-                lexicon_labels[word] = 1
+                lexicon_labels[key] = 1
 
             key += 1
 
