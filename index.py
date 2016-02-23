@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 import csv
 import json
 import numpy
@@ -7,7 +7,7 @@ from pprint import pprint
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import paths
+from utility import lexicon, paths, token_minimum_count
 
 
 class Index:
@@ -36,22 +36,23 @@ class Index:
             print('indexing without training...')
 
         print('reading csv ' + csv_type + '...')
-        self.tweet_labels = self.read_csv(csv_type)
+        self.tweet_labels = self.read_labels(csv_type)
         print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
         print('reading tweets...')
         self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
-    
+
         print('adding into feature set...')
-        for k, v in self.tweet_data.items():
-            self.add_to_feature_set(v)
+        self.add_to_feature_set(self.tweet_data)
+        self.add_lexicon_to_feature_set(lexicon)
+        print('added ' + str(len(self.feature_set)) + ' (word) features')
 
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
-        print('indexing complete!')
+        print('indexing complete!\n')
 
-    def read_csv(self, csv_name):
+    def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
         with open(paths['files'][csv_name]) as csv_file:
@@ -63,13 +64,29 @@ class Index:
 
         return tweet_labels
 
-    def add_to_feature_set(self, stemmed_words):
-        # Add token to feature_set.
-        # TODO: Maybe move this part out of this method.
+    def add_to_feature_set(self, stemmed_tweets):
+        """Add token to feature_set if it appears more than twice."""
+        if not self.train:
+            return
 
-        for x in stemmed_words:
-            if x not in self.feature_set and self.train:
-                self.feature_set[x] = len(self.feature_set)
+        word_tokens = defaultdict(int)
+
+        for tweet_id, stemmed_words in stemmed_tweets.items():
+            for word in stemmed_words:
+                word_tokens[word] += 1
+
+        i = 0
+        for word, count in word_tokens.items():
+            if count >= token_minimum_count:
+                self.feature_set[word] = i
+                i += 1
+
+    def add_lexicon_to_feature_set(self, lexicon):
+        i = len(self.feature_set)
+        for word, v in lexicon.items():
+            if word not in self.feature_set:
+                self.feature_set[word] = i
+                i += 1
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()

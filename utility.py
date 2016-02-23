@@ -1,11 +1,6 @@
+import csv
 import nltk
 import string
-
-
-# Language tools.
-punctuation_set = set(string.punctuation)
-stopwords_set = set(nltk.corpus.stopwords.words('english'))
-stemmer = nltk.stem.snowball.SnowballStemmer('english')
 
 # Configuration.
 from configparser import SafeConfigParser
@@ -20,3 +15,26 @@ files.update(config.items('file'))
 directories.update(config.items('directory'))
 
 paths = {'files': files, 'directories': directories}
+
+
+def read_lexicon(csv_name):
+    lexicon = {}
+
+    with open(csv_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='\t')
+        for row in csv_reader:
+            # Strip # if there is.
+            if row[0].find('#'):
+                word = row[0][1:]
+            else:
+                word = row[0]
+            lexicon[word] = row[1]
+
+    return lexicon
+
+# Language tools.
+punctuation_set = set(string.punctuation)
+stopwords_set = set(nltk.corpus.stopwords.words('english'))
+stemmer = nltk.stem.snowball.SnowballStemmer('english')
+lexicon = read_lexicon(paths['files']['lexicon'])
+token_minimum_count = 2
