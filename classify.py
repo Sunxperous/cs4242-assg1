@@ -9,8 +9,8 @@ trained_index = Index('training')
 knn = neighbors.KNeighborsClassifier(weights='distance')
 samples = [v for k, v in trained_index.tweet_features.items()]
 targets = [v for k, v in trained_index.tweet_labels.items()]
-knn.fit(samples, targets)
 
+knn.fit(samples, targets)
 
 testing_index = Index('testing', trained_index.feature_set)
 

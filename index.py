@@ -1,14 +1,13 @@
 from collections import OrderedDict
 import csv
 import json
-import nltk
 import numpy
 from os import listdir, path
 from pprint import pprint
 
-
+from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import paths, punctuation_set, stemmer, stopwords_set
+from utility import paths
 
 
 class Index:
@@ -42,6 +41,11 @@ class Index:
         print('reading tweets...')
         self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
+    
+        print('adding into feature set...')
+        for k, v in self.tweet_data.items():
+            self.add_to_feature_set(v)
+
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
@@ -59,33 +63,13 @@ class Index:
 
         return tweet_labels
 
-    def process_tweet(self, json_data):
-        text = json_data.get('text')
-
-        # Strip URLs.
-        for url in json_data.get('entities').get('urls', []):
-            text = text.replace(url.get('url', ''), '')
-
-        # Strip words beginning with @ or #.
-        # TODO: Strip "RT" at the beginning of the tweet?
-        text_split = text.split(' ')
-        text = ' '.join([x for x in text_split if len(x) > 0 and x[0] != '@' and x[0] != '#'])
-
-        # Tokenize and remove punctuation and stopwords.
-        # TODO: Might need to consider stopwords that tweak meanings of words, e.g. 'not'.
-        tokens = nltk.word_tokenize(text)
-        tokens = [x for x in tokens if x not in punctuation_set and x not in stopwords_set]
-
-        # Stem the tokens.
-        stemmed = [stemmer.stem(x) for x in tokens]
-
+    def add_to_feature_set(self, stemmed_words):
         # Add token to feature_set.
         # TODO: Maybe move this part out of this method.
-        for x in stemmed:
+
+        for x in stemmed_words:
             if x not in self.feature_set and self.train:
                 self.feature_set[x] = len(self.feature_set)
-
-        return stemmed
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
@@ -99,7 +83,7 @@ class Index:
                     and tweet_id[tweet_id.rfind('/')+1:] in self.tweet_labels):
                 with open(full_path) as json_file:
                     json_data = json.load(json_file)
-                    json_tweets[json_data['id']] = self.process_tweet(json_data)
+                    json_tweets[json_data['id']] = process_tweet(json_data)
 
         return json_tweets
 
