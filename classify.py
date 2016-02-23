@@ -41,18 +41,51 @@ for tweet_id, predicted in prediction.items():
         print(str(tweet_id) + ' not found in tweet_labels, wtf?')
     else:
         actual = testing_index.tweet_labels[str(tweet_id)]
-        results[predicted % 4][actual % 4] += 1
+        results[actual % 4][predicted % 4] += 1
         if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
-            print(tweet_id)
+            # print(tweet_id)
             # print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
-            print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
+            # print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
 
         else:
             correct += 1
 
-print('wrong result: ' + str(results))
+# print('wrong result: ' + str(results))
 
-print('correct: ' + str(correct) + '; wrong: ' + str(wrong))
+positive_count = 0
+negative_count = 0
+neutral_count = 0
+irrelevant_count = 0
+
+for result in results[0]:
+    positive_count += result
+
+for result in results[1]:
+    negative_count += result
+
+for result in results[2]:
+    neutral_count += result
+
+for result in results[3]:
+    irrelevant_count += result
+
+print('* Out of ' + str(positive_count) + ' positive tweets...',)
+for i, result in enumerate(results[0]):
+    print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/positive_count * 100, '.2f')) + '%)')
+
+print('* Out of ' + str(negative_count) + ' negative tweets...',)
+for i, result in enumerate(results[1]):
+    print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/negative_count * 100, '.2f')) + '%)')
+
+print('* Out of ' + str(neutral_count) + ' neutral tweets...',)
+for i, result in enumerate(results[2]):
+    print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/neutral_count * 100, '.2f')) + '%)')
+
+print('* Out of ' + str(irrelevant_count) + ' irrelevant tweets...',)
+for i, result in enumerate(results[3]):
+    print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/irrelevant_count * 100, '.2f')) + '%)')
+
+# print('correct: ' + str(correct) + '; wrong: ' + str(wrong))
 
 
