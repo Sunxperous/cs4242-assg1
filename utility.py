@@ -20,3 +20,5 @@ files.update(config.items('file'))
 directories.update(config.items('directory'))
 
 paths = {'files': files, 'directories': directories}
+
+token_minimum_count = 1
