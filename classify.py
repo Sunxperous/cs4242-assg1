@@ -29,7 +29,7 @@ elif model == 2:
 
 clf.fit(samples, targets)   
 
-testing_index = Index('testing', trained_index.feature_set)
+testing_index = Index('training', trained_index.feature_set)
 
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
@@ -52,7 +52,6 @@ for tweet_id, predicted in prediction.items():
             # print(tweet_id)
             # print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
             # print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
-
         else:
             correct += 1
 

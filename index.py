@@ -8,7 +8,7 @@ import random
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import lexicon, paths, token_minimum_count
+from utility import positive, negative, paths, token_minimum_count
 
 
 class Index:
@@ -45,14 +45,16 @@ class Index:
 
         print('adding into feature set...')
         self.add_to_feature_set(self.tweet_data)
-        self.add_lexicon_to_feature_set(lexicon)
+        #self.add_lexicon_to_feature_set(positive)
+        self.add_lexicon_to_feature_set(negative)
         print('added ' + str(len(self.feature_set)) + ' (word) features')
 
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('creating feature vectors from lexicon...')
-        self.generate_lexicon_data(lexicon)
+        #self.generate_lexicon_data(positive, True)
+        self.generate_lexicon_data(negative, False)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
@@ -129,7 +131,7 @@ class Index:
 
         return tweet_features
 
-    def generate_lexicon_data(self, lexicon):
+    def generate_lexicon_data(self, lexicon, isPositive):
         if not self.train:
             return
 
@@ -137,18 +139,23 @@ class Index:
         lexicon_labels = OrderedDict()
 
         key = random.getrandbits(32)
-        for word, weight in lexicon.items():
+        for word, v in lexicon.items():
+            if word in self.feature_set:
+                continue
+
+            """
             if float(weight) >= 0.15 and float(weight) <= 0.5:
                 continue
+            """
 
             # Generate feature vector of word.
             lexicon_vectors[key] = numpy.zeros(len(self.feature_set))
             lexicon_vectors[key][self.feature_set[word]] += 1
 
             # Generate label of word.
-            if float(weight) > 0.5:
+            if isPositive:
                 lexicon_labels[word] = 0
-            elif float(weight) < 0.15:
+            else:
                 lexicon_labels[word] = 1
 
             key += 1

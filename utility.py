@@ -24,12 +24,14 @@ def read_lexicon(csv_name):
         csv_reader = csv.reader(csv_file, delimiter='\t')
         for row in csv_reader:
             # Strip # if there is.
+            """
             if not row[0].find('#'):
                 word = row[0][1:]
             else:
                 word = row[0]
             if len(word.split(' ')) == 1:
-                lexicon[word] = row[1]
+        	"""
+            lexicon[row[0]] = row[0]
 
     return lexicon
 
@@ -37,5 +39,7 @@ def read_lexicon(csv_name):
 punctuation_set = set(string.punctuation)
 stopwords_set = set(nltk.corpus.stopwords.words('english'))
 stemmer = nltk.stem.snowball.SnowballStemmer('english')
-lexicon = read_lexicon(paths['files']['lexicon'])
+positive = read_lexicon(paths['files']['positive'])
+negative = read_lexicon(paths['files']['negative'])
+# lexicon = read_lexicon(paths['files']['lexicon'])
 token_minimum_count = 2
