@@ -4,6 +4,7 @@ import json
 import numpy
 from os import listdir, path
 from pprint import pprint
+import random
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
@@ -49,7 +50,10 @@ class Index:
 
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
-        print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
+        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        print('creating feature vectors from lexicon...')
+        self.generate_lexicon_data(lexicon)
+        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
     def read_labels(self, csv_name):
@@ -59,7 +63,7 @@ class Index:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                label_id = label.ids[row[0]][row[1]]
+                label_id = label.ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
                 tweet_labels[row[2]] =  label_id
 
         return tweet_labels
@@ -124,4 +128,32 @@ class Index:
             tweet_features[tweet_id] = vector
 
         return tweet_features
+
+    def generate_lexicon_data(self, lexicon):
+        if not self.train:
+            return
+
+        lexicon_vectors = OrderedDict()
+        lexicon_labels = OrderedDict()
+
+        key = random.getrandbits(32)
+        for word, weight in lexicon.items():
+            if float(weight) >= 0.15 and float(weight) <= 0.5:
+                continue
+
+            # Generate feature vector of word.
+            lexicon_vectors[key] = numpy.zeros(len(self.feature_set))
+            lexicon_vectors[key][self.feature_set[word]] += 1
+
+            # Generate label of word.
+            if float(weight) > 0.5:
+                lexicon_labels[word] = 0
+            elif float(weight) < 0.15:
+                lexicon_labels[word] = 1
+
+            key += 1
+
+        self.tweet_features.update(lexicon_vectors)
+        self.tweet_labels.update(lexicon_labels)
+
 
