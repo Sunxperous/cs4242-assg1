@@ -24,11 +24,12 @@ def read_lexicon(csv_name):
         csv_reader = csv.reader(csv_file, delimiter='\t')
         for row in csv_reader:
             # Strip # if there is.
-            if row[0].find('#'):
+            if not row[0].find('#'):
                 word = row[0][1:]
             else:
                 word = row[0]
-            lexicon[word] = row[1]
+            if len(word.split(' ')) == 1:
+                lexicon[word] = row[1]
 
     return lexicon
 
