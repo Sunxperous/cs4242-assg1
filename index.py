@@ -7,7 +7,7 @@ from pprint import pprint
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import paths, token_minimum_count
+from utility import lexicon, paths, token_minimum_count
 
 
 class Index:
@@ -36,7 +36,7 @@ class Index:
             print('indexing without training...')
 
         print('reading csv ' + csv_type + '...')
-        self.tweet_labels = self.read_csv(csv_type)
+        self.tweet_labels = self.read_labels(csv_type)
         print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
         print('reading tweets...')
         self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
@@ -51,7 +51,7 @@ class Index:
         print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
-    def read_csv(self, csv_name):
+    def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
         with open(paths['files'][csv_name]) as csv_file:
@@ -79,6 +79,9 @@ class Index:
             if count >= token_minimum_count:
                 self.feature_set[word] = i
                 i += 1
+
+    def add_lexicon(self, lexicon):
+        pass
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
