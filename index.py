@@ -16,7 +16,7 @@ class Index:
         feature_set: All the terms used to generate the feature vectors.
         train: Whether to add terms to the feature_set or not.
         tweet_labels: Actual topic and sentiment labels for given tweet.
-        tweet_data: Raw tweet data.
+        tweet_data: Processed raw tweet data.
         tweet_features: Tweet data transformed into feature vectors.
     """
     def __init__(self, csv_type, feature_set=None):
@@ -71,8 +71,8 @@ class Index:
 
         word_tokens = defaultdict(int)
 
-        for tweet_id, stemmed_words in stemmed_tweets.items():
-            for word in stemmed_words:
+        for tweet_id, data in stemmed_tweets.items():
+            for word in data['stemmed']:
                 word_tokens[word] += 1
 
         i = 0
@@ -110,10 +110,17 @@ class Index:
         for tweet_id, data in tweet_data.items():
             vector = numpy.zeros(len(self.feature_set))
 
-            for token in data:
+            # Token level features.
+            for token in data['stemmed']:
                 if token in self.feature_set:
                     vector[self.feature_set[token]] += 1  # Not normalised.
 
+            # Social features.
+            #user_data = data['user']
+            #vector = numpy.append(vector, user_data['followers_count'])
+            #vector = numpy.append(vector, user_data['friends_count'])
+            #vector = numpy.append(vector, user_data['listed_count'])
+            #vector = numpy.append(vector, user_data['statuses_count'])
             tweet_features[tweet_id] = vector
 
         return tweet_features
