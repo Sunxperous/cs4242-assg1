@@ -2,17 +2,16 @@ import nltk
 
 from utility import punctuation_set, stemmer, stopwords_set
 
+for w in ['don', 'no', 'not']:
+    stopwords_set.remove(w)
+stopwords_set.add('RT')
+
 def process_tweet(json_data):
     text = json_data.get('text')
 
     # Strip URLs.
     for url in json_data.get('entities').get('urls', []):
-        text = text.replace(url.get('url', ''), '')
-
-    # Strip words beginning with @ or #.
-    # TODO: Strip "RT" at the beginning of the tweet?
-    text_split = text.split(' ')
-    text = ' '.join([x for x in text_split if len(x) > 0 and x[0] != '@' and x[0] != '#'])
+        text = text.replace(url.get('url', ''), 'http')
 
     # Tokenize and remove punctuation and stopwords.
     # TODO: Might need to consider stopwords that tweak meanings of words, e.g. 'not'.
@@ -22,4 +21,8 @@ def process_tweet(json_data):
     # Stem the tokens.
     stemmed = [stemmer.stem(x) for x in tokens]
 
-    return stemmed
+    result = {}
+    result['stemmed'] = stemmed
+    result['user'] = json_data.get('user')
+
+    return result

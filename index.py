@@ -1,13 +1,14 @@
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 import csv
 import json
 import numpy
 from os import listdir, path
 from pprint import pprint
+import random
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import paths
+from utility import lexicon, paths, token_minimum_count
 
 
 class Index:
@@ -16,7 +17,7 @@ class Index:
         feature_set: All the terms used to generate the feature vectors.
         train: Whether to add terms to the feature_set or not.
         tweet_labels: Actual topic and sentiment labels for given tweet.
-        tweet_data: Raw tweet data.
+        tweet_data: Processed raw tweet data.
         tweet_features: Tweet data transformed into feature vectors.
     """
     def __init__(self, csv_type, feature_set=None):
@@ -36,40 +37,60 @@ class Index:
             print('indexing without training...')
 
         print('reading csv ' + csv_type + '...')
-        self.tweet_labels = self.read_csv(csv_type)
+        self.tweet_labels = self.read_labels(csv_type)
         print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
         print('reading tweets...')
         self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
-    
+
         print('adding into feature set...')
-        for k, v in self.tweet_data.items():
-            self.add_to_feature_set(v)
+        self.add_to_feature_set(self.tweet_data)
+        self.add_lexicon_to_feature_set(lexicon)
+        print('added ' + str(len(self.feature_set)) + ' (word) features')
 
         print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
-        print('generated ' + str(len(self.tweet_features)) + ' feature vectors')
-        print('indexing complete!')
+        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        print('creating feature vectors from lexicon...')
+        self.generate_lexicon_data(lexicon)
+        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        print('indexing complete!\n')
 
-    def read_csv(self, csv_name):
+    def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
         with open(paths['files'][csv_name]) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                label_id = label.ids[row[0]][row[1]]
+                label_id = label.ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
                 tweet_labels[row[2]] =  label_id
 
         return tweet_labels
 
-    def add_to_feature_set(self, stemmed_words):
-        # Add token to feature_set.
-        # TODO: Maybe move this part out of this method.
+    def add_to_feature_set(self, stemmed_tweets):
+        """Add token to feature_set if it appears more than twice."""
+        if not self.train:
+            return
 
-        for x in stemmed_words:
-            if x not in self.feature_set and self.train:
-                self.feature_set[x] = len(self.feature_set)
+        word_tokens = defaultdict(int)
+
+        for tweet_id, data in stemmed_tweets.items():
+            for word in data['stemmed']:
+                word_tokens[word] += 1
+
+        i = 0
+        for word, count in word_tokens.items():
+            if count >= token_minimum_count:
+                self.feature_set[word] = i
+                i += 1
+
+    def add_lexicon_to_feature_set(self, lexicon):
+        i = len(self.feature_set)
+        for word, v in lexicon.items():
+            if word not in self.feature_set:
+                self.feature_set[word] = i
+                i += 1
 
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
@@ -93,11 +114,46 @@ class Index:
         for tweet_id, data in tweet_data.items():
             vector = numpy.zeros(len(self.feature_set))
 
-            for token in data:
+            # Token level features.
+            for token in data['stemmed']:
                 if token in self.feature_set:
                     vector[self.feature_set[token]] += 1  # Not normalised.
 
+            # Social features.
+            #user_data = data['user']
+            #vector = numpy.append(vector, user_data['followers_count'])
+            #vector = numpy.append(vector, user_data['friends_count'])
+            #vector = numpy.append(vector, user_data['listed_count'])
+            #vector = numpy.append(vector, user_data['statuses_count'])
             tweet_features[tweet_id] = vector
 
         return tweet_features
+
+    def generate_lexicon_data(self, lexicon):
+        if not self.train:
+            return
+
+        lexicon_vectors = OrderedDict()
+        lexicon_labels = OrderedDict()
+
+        key = random.getrandbits(32)
+        for word, weight in lexicon.items():
+            if float(weight) >= 0.15 and float(weight) <= 0.5:
+                continue
+
+            # Generate feature vector of word.
+            lexicon_vectors[key] = numpy.zeros(len(self.feature_set))
+            lexicon_vectors[key][self.feature_set[word]] += 1
+
+            # Generate label of word.
+            if float(weight) > 0.5:
+                lexicon_labels[word] = 0
+            elif float(weight) < 0.15:
+                lexicon_labels[word] = 1
+
+            key += 1
+
+        self.tweet_features.update(lexicon_vectors)
+        self.tweet_labels.update(lexicon_labels)
+
 

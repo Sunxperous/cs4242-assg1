@@ -35,10 +35,6 @@ prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
     prediction[tweet_id] = clf.predict([feature_vector])[0]
 
-#print([k for k, v in testing_index.tweet_features.items()])
-#print([k for k, v in prediction.items()])
-#exit()
-
 correct = 0
 wrong = 0
 
