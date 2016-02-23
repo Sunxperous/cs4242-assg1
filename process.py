@@ -2,6 +2,8 @@ import nltk
 
 from utility import punctuation_set, stemmer, stopwords_set
 
+for w in ['don', 'no', 'not']:
+    stopwords_set.remove(w)
 stopwords_set.add('RT')
 
 def process_tweet(json_data):
