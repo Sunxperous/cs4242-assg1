@@ -1,6 +1,6 @@
 ## Local .gitignore
 
-config.ini
+config.yml
 data/
 
 

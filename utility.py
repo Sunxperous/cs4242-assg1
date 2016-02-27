@@ -1,18 +1,27 @@
 import csv
-
-# Configuration.
-from configparser import SafeConfigParser
-config = SafeConfigParser()
+import yaml
 
 # Read default configuration.
-config.read('config.default.ini')
-files = dict(config.items('file'))
-directories = dict(config.items('directory'))
+with open('config.default.yml') as j:
+    default_config = yaml.load(j.read())
+files = default_config.get('files')
+directories = default_config.get('directories')
+constants = default_config.get('constants')
+toggles = default_config.get('toggles')
 
 # Read custom configuration.
-config.read('config.ini')
-files.update(config.items('file'))
-directories.update(config.items('directory'))
+try:
+    with open('config.yml') as j:
+        custom_config = yaml.load(j.read())
+except FileNotFoundError:
+    custom_config = {}
+finally:
+    if custom_config == None:
+        custom_config = {}
+files.update(custom_config.get('files', {}))
+directories.update(custom_config.get('directories', {}))
+constants.update(custom_config.get('constants', {}))
+toggles.update(custom_config.get('toggles', {}))
 
 
 # Lexicon.

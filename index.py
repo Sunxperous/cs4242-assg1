@@ -7,10 +7,8 @@ from pprint import pprint
 import random
 
 from process import process_tweet
-from utility import directories, files, label_ids, lexicon
+from utility import constants, directories, files, label_ids, lexicon, toggles
 
-
-token_minimum_count = 1
 
 class Index:
     """
@@ -49,8 +47,9 @@ class Index:
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
 
-        #self.generate_lexicon_data(lexicon)
-        #print('lexicon: generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        if toggles['generate_lexicon_data']:
+            self.generate_lexicon_data(lexicon)
+            print('lexicon: generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
     def read_labels(self, csv_name):
@@ -78,7 +77,7 @@ class Index:
 
         i = 0
         for word, count in word_tokens.items():
-            if count >= token_minimum_count:
+            if count >= constants['token_minimum_count']:
                 self.feature_set[word] = i
                 i += 1
 
@@ -92,15 +91,10 @@ class Index:
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
 
-        self.max_counts = {
-            'favourites': 0,
-            'followers': 0,
-            'friends': 0,
-            'listed': 0,
-            'statuses': 0
-        }
-
-        self.tweet_properties = ['verified', 'lang']
+        self.max_counts = {}
+        for c in constants['social_user_countable']:
+            self.max_counts[c] = 0
+        self.tweet_properties = constants['social_user_boolean']
 
         # TODO: Iterate on tweet_labels list instead of iterating on directory.
         for f in listdir(dir_name):

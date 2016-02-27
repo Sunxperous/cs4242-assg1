@@ -1,5 +1,6 @@
 import nltk
 import string
+from utility import constants, toggles
 
 
 punctuation_set = set(string.punctuation)
@@ -7,8 +8,9 @@ stopwords_set = set(nltk.corpus.stopwords.words('english'))
 stemmer = nltk.stem.snowball.SnowballStemmer('english')
 twitter_tokenizer = nltk.tokenize.TweetTokenizer(reduce_len=3)
 
-for w in ['don', 'no', 'not']:
-    stopwords_set.remove(w)
+if toggles['stopwords_ignore_negation']:
+    for w in constants['stopwords_negation']:
+        stopwords_set.remove(w)
 stopwords_set.add('RT')
 
 
