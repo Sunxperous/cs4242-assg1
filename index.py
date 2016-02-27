@@ -95,6 +95,14 @@ class Index:
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
 
+        self.max_counts = {
+            'favourites': 0,
+            'followers': 0,
+            'friends': 0,
+            'listed': 0,
+            'statuses': 0
+        }
+
         # TODO: Iterate on tweet_labels list instead of iterating on directory.
         for f in listdir(dir_name):
             full_path = path.join(dir_name, f)
@@ -105,6 +113,11 @@ class Index:
                 with open(full_path) as json_file:
                     json_data = json.load(json_file)
                     json_tweets[json_data['id']] = process_tweet(json_data)
+
+                    user_data = json_data['user']
+                    for t, v in self.max_counts.items():
+                        if user_data[t + '_count'] > v:
+                            self.max_counts[t] = user_data[t + '_count']
 
         return json_tweets
 
@@ -121,10 +134,9 @@ class Index:
 
             # Social features.
             user_data = data['user']
-            vector = numpy.append(vector, float(user_data['followers_count']))
-            vector = numpy.append(vector, float(user_data['friends_count']))
-            vector = numpy.append(vector, float(user_data['listed_count']))
-            vector = numpy.append(vector, float(user_data['statuses_count']))
+            for t, v in self.max_counts.items():
+                vector = numpy.append(vector, user_data[t + '_count'] / v)
+
             tweet_features[tweet_id] = vector
 
         return tweet_features
