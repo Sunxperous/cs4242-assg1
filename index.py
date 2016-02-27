@@ -103,6 +103,8 @@ class Index:
             'statuses': 0
         }
 
+        self.tweet_properties = ['verified', 'lang']
+
         # TODO: Iterate on tweet_labels list instead of iterating on directory.
         for f in listdir(dir_name):
             full_path = path.join(dir_name, f)
@@ -136,6 +138,12 @@ class Index:
             user_data = data['user']
             for t, v in self.max_counts.items():
                 vector = numpy.append(vector, user_data[t + '_count'] / v)
+
+            for p in self.tweet_properties:
+                append = 0
+                if user_data[p] == True:
+                    append = 1
+                vector = numpy.append(vector, append)
 
             tweet_features[tweet_id] = vector
 
