@@ -49,14 +49,8 @@ for tweet_id, predicted in prediction.items():
         results[actual % 4][predicted % 4] += 1
         if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
-            # print(tweet_id)
-            # print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
-            # print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
-
         else:
             correct += 1
-
-# print('wrong result: ' + str(results))
 
 positive_count = 0
 negative_count = 0
@@ -91,6 +85,7 @@ print('* Out of ' + str(irrelevant_count) + ' irrelevant tweets...',)
 for i, result in enumerate(results[3]):
     print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/irrelevant_count * 100, '.2f')) + '%)')
 
-# print('correct: ' + str(correct) + '; wrong: ' + str(wrong))
+print('*** Out of ' + str(correct + wrong) + ' total tweets...')
+print('correct: ' + str(correct) + '; wrong: ' + str(wrong) + ' (' + str(format(correct/(correct+wrong) * 100, '.2f')) + '%)')
 
 
