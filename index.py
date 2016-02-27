@@ -52,7 +52,7 @@ class Index:
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('creating feature vectors from lexicon...')
-        self.generate_lexicon_data(lexicon)
+        #self.generate_lexicon_data(lexicon)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
