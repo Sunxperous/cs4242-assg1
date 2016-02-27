@@ -8,8 +8,10 @@ import random
 
 from process import process_tweet
 import label  # label.py for topic and sentiment ids
-from utility import lexicon, paths, token_minimum_count
+from utility import directories, files, lexicon
 
+
+token_minimum_count = 1
 
 class Index:
     """
@@ -40,7 +42,7 @@ class Index:
         self.tweet_labels = self.read_labels(csv_type)
         print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
         print('reading tweets...')
-        self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
+        self.tweet_data = self.read_tweets(directories.get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
 
         print('adding into feature set...')
@@ -59,7 +61,7 @@ class Index:
     def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
-        with open(paths['files'][csv_name]) as csv_file:
+        with open(files[csv_name]) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
