@@ -39,22 +39,18 @@ class Index:
 
         print('reading csv ' + csv_type + '...')
         self.tweet_labels = self.read_labels(csv_type)
-        print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
-        print('reading tweets...')
         self.tweet_data = self.read_tweets(directories.get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
 
-        print('adding into feature set...')
         self.add_to_feature_set(self.tweet_data)
         self.add_lexicon_to_feature_set(lexicon)
         print('added ' + str(len(self.feature_set)) + ' (word) features')
 
-        print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
-        print('creating feature vectors from lexicon...')
+
         #self.generate_lexicon_data(lexicon)
-        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        #print('lexicon: generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
         print('indexing complete!\n')
 
     def read_labels(self, csv_name):
