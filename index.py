@@ -7,8 +7,7 @@ from pprint import pprint
 import random
 
 from process import process_tweet
-import label  # label.py for topic and sentiment ids
-from utility import directories, files, lexicon
+from utility import directories, files, label_ids, lexicon
 
 
 token_minimum_count = 1
@@ -65,8 +64,8 @@ class Index:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                label_id = label.ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
-                tweet_labels[int(row[2])] =  label_id
+                label_id = label_ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
+                tweet_labels[int(row[2])] = label_id
 
         return tweet_labels
 

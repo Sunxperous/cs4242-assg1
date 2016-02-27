@@ -15,6 +15,7 @@ files.update(config.items('file'))
 directories.update(config.items('directory'))
 
 
+# Lexicon.
 def read_lexicon(csv_name):
     lexicon = {}
 
@@ -31,5 +32,16 @@ def read_lexicon(csv_name):
 
     return lexicon
 
-# Language tools.
 lexicon = read_lexicon(files['lexicon'])
+
+
+# Labels.
+label_ids = dict()
+count = 0
+for topic in ['apple', 'google', 'microsoft', 'twitter']:
+    label_ids[topic] = dict()
+    for sentiment in ['positive', 'negative', 'neutral', 'irrelevant']:
+        label_ids[topic][sentiment] = count
+        count += 1
+# count should be 16.
+
