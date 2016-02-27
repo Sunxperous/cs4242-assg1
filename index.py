@@ -120,11 +120,11 @@ class Index:
                     vector[self.feature_set[token]] += 1  # Not normalised.
 
             # Social features.
-            #user_data = data['user']
-            #vector = numpy.append(vector, user_data['followers_count'])
-            #vector = numpy.append(vector, user_data['friends_count'])
-            #vector = numpy.append(vector, user_data['listed_count'])
-            #vector = numpy.append(vector, user_data['statuses_count'])
+            user_data = data['user']
+            vector = numpy.append(vector, float(user_data['followers_count']))
+            vector = numpy.append(vector, float(user_data['friends_count']))
+            vector = numpy.append(vector, float(user_data['listed_count']))
+            vector = numpy.append(vector, float(user_data['statuses_count']))
             tweet_features[tweet_id] = vector
 
         return tweet_features
@@ -136,13 +136,15 @@ class Index:
         lexicon_vectors = OrderedDict()
         lexicon_labels = OrderedDict()
 
+        length_of_vector = len(self.tweet_features[next(iter(self.tweet_features))])
+
         key = random.getrandbits(32)
         for word, weight in lexicon.items():
             if float(weight) >= 0.15 and float(weight) <= 0.5:
                 continue
 
             # Generate feature vector of word.
-            lexicon_vectors[key] = numpy.zeros(len(self.feature_set))
+            lexicon_vectors[key] = numpy.zeros(length_of_vector)
             lexicon_vectors[key][self.feature_set[word]] += 1
 
             # Generate label of word.
