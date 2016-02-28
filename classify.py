@@ -9,7 +9,7 @@ model = int(input('Input 1 for KNN and 2 for SVM '))
 if model == 1:
     num_neighbours = int(input('Input Number of Neighbours for KNN '))
 elif model == 2:
-    penalty_constant = int(input('Input Penalty Constant, C '))
+    penalty_constant = float(input('Input Penalty Constant, C '))
 else:
     exit()
 
