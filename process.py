@@ -33,10 +33,11 @@ def process_tweet(json_data):
     tokens = [x for x in tokens if x not in punctuation_set and x not in stopwords_set]
 
     # Stem the tokens.
-    stemmed = [stemmer.stem(x) for x in tokens]
+    if toggles['stem_tokens']:
+        tokens = [stemmer.stem(x) for x in tokens]
 
     result = {}
-    result['stemmed'] = stemmed
+    result['stemmed'] = tokens
     result['user'] = json_data.get('user')
 
     return result

@@ -2,6 +2,7 @@ from sklearn import neighbors
 from sklearn import svm
 
 from index import Index
+from utility import constants, toggles
 
 model = int(input('Input 1 for KNN and 2 for SVM '))
 
@@ -12,7 +13,7 @@ elif model == 2:
 else:
     exit()
 
-trained_index = Index('training')
+trained_index = Index(constants['file_to_train'])
 
 samples = [v for k, v in sorted(trained_index.tweet_features.items(), key=lambda t: t[0])]
 targets = [v for k, v in sorted(trained_index.tweet_labels.items(), key=lambda t: t[0])]
@@ -29,7 +30,7 @@ elif model == 2:
 
 clf.fit(samples, targets)
 
-testing_index = Index('testing', trained_index.feature_set)
+testing_index = Index(constants['file_to_test'], trained_index.feature_set)
 
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():

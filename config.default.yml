@@ -8,6 +8,10 @@ directories:
   tweets: data/tweets
   users: data/users
 constants:
+  # The file to train.
+  file_to_train: 'training'
+  # The file to test.
+  file_to_test: 'testing'
   # Only include words with a count more than this in the feature set.
   token_minimum_count: 1  
   # Which stopwords to remove, if stopwords_ignore_negation is true.
@@ -21,3 +25,5 @@ toggles:
   stopwords_ignore_negation: true
   # Whether to generate tweets from lexicon.
   generate_lexicon_data: true
+  # Whether to stem the tokens.
+  stem_tokens: true
