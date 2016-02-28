@@ -36,5 +36,6 @@ prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
     prediction[tweet_id] = clf.predict([feature_vector])[0]
 
-from score import print_details
-print_details(testing_index, prediction)
+from score import print_sentiment_details, print_sentiment_f1
+print_sentiment_details(testing_index, prediction)
+print_sentiment_f1(testing_index, prediction)
