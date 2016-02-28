@@ -7,8 +7,7 @@ from pprint import pprint
 import random
 
 from process import process_tweet
-import label  # label.py for topic and sentiment ids
-from utility import positive, negative, paths, token_minimum_count
+from utility import constants, directories, files, label_ids, positive, negative, toggles
 
 
 class Index:
@@ -38,37 +37,36 @@ class Index:
 
         print('reading csv ' + csv_type + '...')
         self.tweet_labels = self.read_labels(csv_type)
-        print('labelled ' + str(len(self.tweet_labels)) + ' tweets')
-        print('reading tweets...')
-        self.tweet_data = self.read_tweets(paths['directories'].get('tweets'))
+        self.tweet_data = self.read_tweets(directories.get('tweets'))
         print('read ' + str(len(self.tweet_data)) + ' tweets')
 
-        print('adding into feature set...')
         self.add_to_feature_set(self.tweet_data)
         self.add_lexicon_to_feature_set(positive)
         self.add_lexicon_to_feature_set(negative)
         print('added ' + str(len(self.feature_set)) + ' (word) features')
 
-        print('generating feature vectors...')
         self.tweet_features = self.generate_feature_vectors(self.tweet_data)
         print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
-        print('creating feature vectors from lexicon...')
 
-        self.generate_lexicon_data(positive, True)
-        self.generate_lexicon_data(negative, False)
-        
-        print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+        if toggles['generate_lexicon_data']:
+            print('creating feature vectors from lexicon...')
+
+            self.generate_lexicon_data(positive, True)
+            self.generate_lexicon_data(negative, False)
+
+            print('generated up to ' + str(len(self.tweet_features)) + ' feature vectors')
+
         print('indexing complete!\n')
 
     def read_labels(self, csv_name):
         tweet_labels = OrderedDict()
 
-        with open(paths['files'][csv_name]) as csv_file:
+        with open(files[csv_name]) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                label_id = label.ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
-                tweet_labels[int(row[2])] =  label_id
+                label_id = label_ids[row[0]][row[1]] % constants['number_of_labels']  # Use 4 labels instead of 16.
+                tweet_labels[int(row[2])] = label_id
 
         return tweet_labels
 
@@ -85,7 +83,7 @@ class Index:
 
         i = 0
         for word, count in word_tokens.items():
-            if count >= token_minimum_count:
+            if count >= constants['token_minimum_count']:
                 self.feature_set[word] = i
                 i += 1
 
@@ -99,6 +97,11 @@ class Index:
     def read_tweets(self, dir_name):
         json_tweets = OrderedDict()
 
+        self.max_counts = {}
+        for c in constants['social_user_countable']:
+            self.max_counts[c] = 0
+        self.tweet_properties = constants['social_user_boolean']
+
         # TODO: Iterate on tweet_labels list instead of iterating on directory.
         for f in listdir(dir_name):
             full_path = path.join(dir_name, f)
@@ -109,6 +112,11 @@ class Index:
                 with open(full_path) as json_file:
                     json_data = json.load(json_file)
                     json_tweets[json_data['id']] = process_tweet(json_data)
+
+                    user_data = json_data['user']
+                    for t, v in self.max_counts.items():
+                        if user_data[t + '_count'] > v:
+                            self.max_counts[t] = user_data[t + '_count']
 
         return json_tweets
 
@@ -124,11 +132,16 @@ class Index:
                     vector[self.feature_set[token]] += 1  # Not normalised.
 
             # Social features.
-            #user_data = data['user']
-            #vector = numpy.append(vector, user_data['followers_count'])
-            #vector = numpy.append(vector, user_data['friends_count'])
-            #vector = numpy.append(vector, user_data['listed_count'])
-            #vector = numpy.append(vector, user_data['statuses_count'])
+            user_data = data['user']
+            for t, v in self.max_counts.items():
+                vector = numpy.append(vector, user_data[t + '_count'] / v)
+
+            for p in self.tweet_properties:
+                append = 0
+                if user_data[p] == True:
+                    append = 1
+                vector = numpy.append(vector, append)
+
             tweet_features[tweet_id] = vector
 
         return tweet_features
@@ -139,6 +152,8 @@ class Index:
 
         lexicon_vectors = OrderedDict()
         lexicon_labels = OrderedDict()
+
+        length_of_vector = len(self.tweet_features[next(iter(self.tweet_features))])
 
         key = random.getrandbits(32)
         for word, v in lexicon.items():
@@ -151,7 +166,7 @@ class Index:
             """
 
             # Generate feature vector of word.
-            lexicon_vectors[key] = numpy.zeros(len(self.feature_set))
+            lexicon_vectors[key] = numpy.zeros(length_of_vector)
             lexicon_vectors[key][self.feature_set[word]] += 1
 
             # Generate label of word.

@@ -2,6 +2,7 @@ from sklearn import neighbors
 from sklearn import svm
 
 from index import Index
+from utility import constants, toggles
 
 model = int(input('Input 1 for KNN and 2 for SVM '))
 
@@ -12,16 +13,16 @@ elif model == 2:
 else:
     exit()
 
-trained_index = Index('training')
+trained_index = Index(constants['file_to_train'])
 
 samples = [v for k, v in sorted(trained_index.tweet_features.items(), key=lambda t: t[0])]
 targets = [v for k, v in sorted(trained_index.tweet_labels.items(), key=lambda t: t[0])]
 
 if model == 1:
-    clf = neighbors.KNeighborsClassifier(n_neighbors=num_neighbours, weights='uniform')
+    clf = neighbors.KNeighborsClassifier(n_neighbors=num_neighbours, weights=constants['knn_weights'])
     # n_neighbors is default 5
 elif model == 2:
-    clf = svm.SVC(kernel='linear', C=penalty_constant)
+    clf = svm.SVC(kernel=constants['svm_kernel'], C=penalty_constant)
     # linear kernel is used when feature size is big (~10,000) and sample size is moderate (5000)
     # C is default 1.0, decrease if overfitting, increase if underfitting
     # if uneven data result, try adding (class_weight='balanced')
@@ -29,7 +30,7 @@ elif model == 2:
 
 clf.fit(samples, targets)
 
-testing_index = Index('testing', trained_index.feature_set)
+testing_index = Index(constants['file_to_test'], trained_index.feature_set)
 
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
@@ -49,13 +50,8 @@ for tweet_id, predicted in prediction.items():
         results[actual % 4][predicted % 4] += 1
         if predicted % 4 != actual % 4:  # Check only for sentiments ignoring topic.
             wrong += 1
-            # print(tweet_id)
-            # print('predicted ' + str(predicted) + ' but actually is ' + str(actual))
-            # print('predicted ' + sentiments[predicted % 4] + ' but actually is ' + sentiments[actual % 4])
         else:
             correct += 1
-
-# print('wrong result: ' + str(results))
 
 positive_count = 0
 negative_count = 0
@@ -90,6 +86,7 @@ print('* Out of ' + str(irrelevant_count) + ' irrelevant tweets...',)
 for i, result in enumerate(results[3]):
     print('classified ' + sentiments[i] + ': ' + str(result) + ' (' + str(format(result/irrelevant_count * 100, '.2f')) + '%)')
 
-# print('correct: ' + str(correct) + '; wrong: ' + str(wrong))
+print('*** Out of ' + str(correct + wrong) + ' total tweets...')
+print('correct: ' + str(correct) + '; wrong: ' + str(wrong) + ' (' + str(format(correct/(correct+wrong) * 100, '.2f')) + '%)')
 
 

@@ -1,22 +1,30 @@
 import csv
-import nltk
-import string
+import yaml
 
-# Configuration.
-from configparser import SafeConfigParser
-config = SafeConfigParser()
 # Read default configuration.
-config.read('config.default.ini')
-files = dict(config.items('file'))
-directories = dict(config.items('directory'))
+with open('config.default.yml') as j:
+    default_config = yaml.load(j.read())
+files = default_config.get('files')
+directories = default_config.get('directories')
+constants = default_config.get('constants')
+toggles = default_config.get('toggles')
+
 # Read custom configuration.
-config.read('config.ini')
-files.update(config.items('file'))
-directories.update(config.items('directory'))
+try:
+    with open('config.yml') as j:
+        custom_config = yaml.load(j.read())
+except FileNotFoundError:
+    custom_config = {}
+finally:
+    if custom_config == None:
+        custom_config = {}
+files.update(custom_config.get('files', {}))
+directories.update(custom_config.get('directories', {}))
+constants.update(custom_config.get('constants', {}))
+toggles.update(custom_config.get('toggles', {}))
 
-paths = {'files': files, 'directories': directories}
 
-
+# Lexicon.
 def read_lexicon(csv_name):
     lexicon = {}
 
@@ -35,11 +43,16 @@ def read_lexicon(csv_name):
 
     return lexicon
 
-# Language tools.
-punctuation_set = set(string.punctuation)
-stopwords_set = set(nltk.corpus.stopwords.words('english'))
-stemmer = nltk.stem.snowball.SnowballStemmer('english')
-positive = read_lexicon(paths['files']['positive'])
-negative = read_lexicon(paths['files']['negative'])
-# lexicon = read_lexicon(paths['files']['lexicon'])
-token_minimum_count = 2
+positive = read_lexicon(files['positive'])
+negative = read_lexicon(files['negative'])
+
+# Labels.
+label_ids = dict()
+count = 0
+for topic in ['apple', 'google', 'microsoft', 'twitter']:
+    label_ids[topic] = dict()
+    for sentiment in ['positive', 'negative', 'neutral', 'irrelevant']:
+        label_ids[topic][sentiment] = count
+        count += 1
+# count should be 16.
+
