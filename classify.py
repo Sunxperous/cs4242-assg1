@@ -19,10 +19,10 @@ samples = [v for k, v in sorted(trained_index.tweet_features.items(), key=lambda
 targets = [v for k, v in sorted(trained_index.tweet_labels.items(), key=lambda t: t[0])]
 
 if model == 1:
-    clf = neighbors.KNeighborsClassifier(n_neighbors=num_neighbours, weights='uniform')
+    clf = neighbors.KNeighborsClassifier(n_neighbors=num_neighbours, weights=constants['knn_weights'])
     # n_neighbors is default 5
 elif model == 2:
-    clf = svm.SVC(kernel='linear', C=penalty_constant)
+    clf = svm.SVC(kernel=constants['svm_kernel'], C=penalty_constant)
     # linear kernel is used when feature size is big (~10,000) and sample size is moderate (5000)
     # C is default 1.0, decrease if overfitting, increase if underfitting
     # if uneven data result, try adding (class_weight='balanced')

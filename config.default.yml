@@ -20,6 +20,10 @@ constants:
   social_user_countable: ['favourites', 'followers', 'friends', 'statuses', 'listed']
   # Which boolean attributes of the tweet user to include in the feature set.
   social_user_boolean: ['verified', 'lang']
+  # KNN weights to use, either 'uniform' or 'distance'.
+  knn_weights: 'uniform'
+  # SVM kernel to use, either 'linear', 'poly', 'rbf', 'sigmoid' or 'precomputed'.
+  svm_kernel: 'linear'
 toggles:
   # Remove words like "not" from the stopwords set.
   stopwords_ignore_negation: true
