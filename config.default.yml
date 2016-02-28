@@ -12,6 +12,8 @@ constants:
   file_to_train: 'training'
   # The file to test.
   file_to_test: 'testing'
+  # Whether to use 16 or 4 labels.
+  number_of_labels: 4
   # Only include words with a count more than this in the feature set.
   token_minimum_count: 1  
   # Which stopwords to remove, if stopwords_ignore_negation is true.

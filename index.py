@@ -59,7 +59,7 @@ class Index:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)  # Skip header row.
             for row in csv_reader:
-                label_id = label_ids[row[0]][row[1]] % 4  # Use 4 labels instead of 16.
+                label_id = label_ids[row[0]][row[1]] % constants['number_of_labels']  # Use 4 labels instead of 16.
                 tweet_labels[int(row[2])] = label_id
 
         return tweet_labels
