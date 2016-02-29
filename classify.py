@@ -31,7 +31,6 @@ elif model == 2:
 clf.fit(samples, targets)
 
 testing_index = Index(constants['file_to_test'], trained_index.feature_set)
-
 prediction = {}
 for tweet_id, feature_vector in testing_index.tweet_features.items():
     prediction[tweet_id] = clf.predict([feature_vector])[0]
@@ -39,3 +38,14 @@ for tweet_id, feature_vector in testing_index.tweet_features.items():
 from score import print_sentiment_details, print_sentiment_f1
 print_sentiment_details(testing_index, prediction)
 print_sentiment_f1(testing_index, prediction)
+
+sentiments = ['positive', 'negative', 'neutral', 'irrelevant']
+file_to_test = str(input('Input test csv name '))
+testing_index = Index(file_to_test, trained_index.feature_set)
+
+tweet_id = 1234
+while tweet_id != -1:
+    tweet_id = int(input('Input tweet id '))
+    predicted = clf.predict([testing_index.tweet_features[tweet_id]])
+    print(sentiments[predicted])
+
