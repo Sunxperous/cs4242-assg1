@@ -29,16 +29,8 @@ def read_lexicon(csv_name):
     lexicon = {}
 
     with open(csv_name) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter='\t')
+        csv_reader = csv.reader(csv_file, delimiter='\n')
         for row in csv_reader:
-            # Strip # if there is.
-            """
-            if not row[0].find('#'):
-                word = row[0][1:]
-            else:
-                word = row[0]
-            if len(word.split(' ')) == 1:
-        	"""
             lexicon[row[0]] = row[0]
 
     return lexicon

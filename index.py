@@ -9,7 +9,6 @@ import random
 from process import process_tweet
 from utility import constants, directories, files, label_ids, positive, negative, toggles
 
-
 class Index:
     """
     Attributes:
@@ -155,15 +154,16 @@ class Index:
 
         length_of_vector = len(self.tweet_features[next(iter(self.tweet_features))])
 
-        key = random.getrandbits(32)
-        for word, v in lexicon.items():
-            if word in self.feature_set:
-                continue
+        if isPositive:
+            key = random.getrandbits(16)
+        else:
+            key = random.getrandbits(32)
 
-            """
-            if float(weight) >= 0.15 and float(weight) <= 0.5:
-                continue
-            """
+        for word, v in lexicon.items():
+            # print(word)
+
+            # if word in self.feature_set:
+            #     continue
 
             # Generate feature vector of word.
             lexicon_vectors[key] = numpy.zeros(length_of_vector)
